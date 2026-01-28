@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Digital Bookshelf</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --bg: #f8fafc;
+            --text: #1e293b;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 40px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        /* Input Styling */
+        .book-form { 
+            display: grid; grid-template-columns: 2fr 2fr 1.5fr auto; gap: 10px;
+            background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        input, select { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; outline: none; }
+        button#addBtn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+
+        /* Table Styling */
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        th { background: #f1f5f9; text-align: left; padding: 15px; font-size: 0.85rem; text-transform: uppercase; color: #64748b; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
+        
+        /* Drag and Drop Visuals */
+        .sortable-ghost { opacity: 0.4; background: #e0e7ff; }
+        .drag-handle { cursor: grab; color: #cbd5e1; font-size: 20px; user-select: none; }
+
+        /* Star Rating Styling */
+        .stars { color: #fbbf24; cursor: pointer; font-size: 1.2rem; }
+        .star-inactive { color: #e2e8f0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📚 My Digital Bookshelf</h2>
+    
+    <div class="book-form">
+        <input type="text" id="title" placeholder="Book Title">
+        <input type="text" id="author" placeholder="Author">
+        <select id="genre">
+            <option value="Fiction">Fiction</option>
+            <option value="Non-Fiction">Non-Fiction</option>
+            <option value="Romance">Romance</option>
+            <option value="Mystery">Mystery</option>
+            <option value="Fantasy">Fantasy</option>
+            <option value="Sci-Fi">Sci-Fi</option>
+            <option value="Biography">Biography</option>
+            <option value="Self-Help">Self-Help</option>
+            <option value="Other">Other</option>
+        </select>
+        <button id="addBtn">Add Book</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th width="40"></th> <th>Title</th>
+                <th>Author</th>
+                <th>Genre</th>
+                <th>Rating</th>
+            </tr>
+        </thead>
+        <tbody id="bookList">
+            </tbody>
+    </table>
+</div>
+
+<script>
+    const addBtn = document.getElementById('addBtn');
+    const bookList = document.getElementById('bookList');
+
+    // 1. Function to create Star Rating HTML
+    function createStars(rating = 0) {
+        let html = '';
+        for (let i = 1; i <= 5; i++) {
+            html += `<span class="star ${i <= rating ? '' : 'star-inactive'}" onclick="setRating(this, ${i})">★</span>`;
+        }
+        return `<div class="stars">${html}</div>`;
+    }
+
+    // 2. Add Book Logic
+    addBtn.addEventListener('click', () => {
+        const title = document.getElementById('title').value;
+        const author = document.getElementById('author').value;
+        const genre = document.getElementById('genre').value;
+
+        if(!title || !author) return alert("Please fill in the title and author!");
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="drag-handle">⠿</td>
+            <td><strong>${title}</strong></td>
+            <td>${author}</td>
+            <td>${genre}</td>
+            <td>${createStars(0)}</td>
+        `;
+        bookList.appendChild(row);
+
+        // Clear inputs
+        document.getElementById('title').value = '';
+        document.getElementById('author').value = '';
+    });
+
+    // 3. Rating Logic (Event Delegation)
+    window.setRating = (el, rating) => {
+        const container = el.parentElement;
+        const stars = container.querySelectorAll('.star');
+        stars.forEach((s, index) => {
+            if (index < rating) s.classList.remove('star-inactive');
+            else s.classList.add('star-inactive');
+        });
+    };
+
+    // 4. Initialize Drag & Drop
+    new Sortable(bookList, {
+        handle: '.drag-handle', // Drag is triggered by the ⠿ icon
+        animation: 150,
+        ghostClass: 'sortable-ghost'
+    });
+</script>
+
+</body>
+</html>
